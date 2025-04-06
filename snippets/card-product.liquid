@@ -1,0 +1,96 @@
+{% assign image_hover_name = card_product.selected_or_first_available_variant.title | downcase | append: "-secondary" %}
+{% assign hover_image = null %}
+{% assign compare_price = false %}
+{% for media in card_product.media %}
+  {% if media.media_type == 'image' and media.src contains image_hover_name %}
+    {% assign hover_image = media.preview_image %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+{% if card_product.selected_or_first_available_variant.featured_media != blank %}
+  {% assign product_image = card_product.selected_or_first_available_variant.featured_media %}
+{% endif %}
+{% if card_product.selected_or_first_available_variant.compare_at_price > card_product.selected_or_first_available_variant.price %} 
+  {% assign compare_price = true %}
+{% endif %}
+<product-card data-product-handle="{{ card_product.handle }}">
+  <div
+    class="mb-5 rounded-[10px] border p-5 relative group"
+  >
+    {%- if card_product.featured_media -%}
+      <div class="ratio relative">
+        <a href="{{ card_product.url }}" class="absolute top-0 bottom-0 w-full" aria-label="{{ card_product.title }}">
+          <img
+            srcset="
+              {%- if product_image.width >= 165 -%}{{ product_image | image_url: width: 165 }} 165w,{%- endif -%}
+              {%- if product_image.width >= 360 -%}{{ product_image | image_url: width: 360 }} 360w,{%- endif -%}
+              {%- if product_image.width >= 533 -%}{{ product_image | image_url: width: 533 }} 533w,{%- endif -%}
+              {%- if product_image.width >= 720 -%}{{ product_image | image_url: width: 720 }} 720w,{%- endif -%}
+              {%- if product_image.width >= 940 -%}{{ product_image | image_url: width: 940 }} 940w,{%- endif -%}
+              {%- if product_image.width >= 1066 -%}{{ product_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+              {{ product_image | image_url }} {{ product_image.width }}w
+            "
+            class="absolute h-full bottom-0 w-full block object-contain max-w-full"
+            data-image-type="main"
+            src="{{ product_image | image_url: width: 533 }}"
+            sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+            alt="{{ product_image.alt | escape }}"
+            {% unless lazy_load == false %}
+              loading="lazy"
+            {% endunless %}
+            width="{{ card_product.featured_media.width }}"
+            height="{{ card_product.featured_media.height }}"
+          />
+          {% if hover_image %}
+            <img
+              srcset="
+                {%- if hover_image.width >= 165 -%}{{ hover_image | image_url: width: 165 }} 165w,{%- endif -%}
+                {%- if hover_image.width >= 360 -%}{{ hover_image | image_url: width: 360 }} 360w,{%- endif -%}
+                {%- if hover_image.width >= 533 -%}{{ hover_image | image_url: width: 533 }} 533w,{%- endif -%}
+                {%- if hover_image.width >= 720 -%}{{ hover_image | image_url: width: 720 }} 720w,{%- endif -%}
+                {%- if hover_image.width >= 940 -%}{{ hover_image | image_url: width: 940 }} 940w,{%- endif -%}
+                {%- if hover_image.width >= 1066 -%}{{ hover_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                {{ hover_image | image_url }} {{ hover_image.width }}w
+              "
+              data-image-type="hover"
+              src="{{ hover_image | image_url: width: 533 }}"
+              sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+              alt="{{ hover_image.alt | escape }}"
+              class="hover-image block max-w-full absolute top-0 left-0 h-full w-full bg-white object-center opacity-0 transition-opacity duration-400 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] object-contain"
+              {% unless lazy_load == false %}
+                loading="lazy"
+              {% endunless %}
+              width="{{ hover_image.width }}"
+              height="{{ hover_image.height }}"
+            />
+          {% endif %}
+        </a>
+      </div>
+    {%- endif -%}
+    <span id="sale-badge" class="top-5 left-5 inline-block border border-regal-red font-franklin-gothic-sans font-medium text-regal-red text-xl px-4 py-1 rounded-full absolute {% unless compare_price %}hidden{% endunless %}">
+      {{ 'products.product.on_sale' | t }}
+    </span>
+  </div>
+  <div>
+    {% if card_product.variants.size > 1 %}
+      {% render 'product-variant-picker', product: card_product %}
+    {% endif %}
+    {% if card_product.type %}
+      <span class="font-regular text-[#111111] text-base text-sm block">{{ card_product.type }}</span>
+    {% endif %}
+    <h3
+      class="text-base mb-1 font-semibold text-[#0A4874]"
+      itemprop="name"
+    >
+      <a aria-label="{{ card_product.title | escape }}" href="{{ card_product.url }}">{{ card_product.title | escape }}</a>
+    </h3>
+    <div class="flex flex-wrap gap-3" id="price">
+      {% if compare_price %}
+        <span class="line-through text-[#111111] text-sm block{{ compare_price }}">{{ card_product.selected_or_first_available_variant.compare_at_price | money }}</span>
+        <span class="text-regal-red text-sm block">{{ card_product.selected_or_first_available_variant.price | money }}</span>
+      {% else %}
+        <span class="text-sm block">{{ card_product.selected_or_first_available_variant.price | money }}</span>
+      {% endif %}
+    </div>
+  </div>
+</product-card>

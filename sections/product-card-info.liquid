@@ -1,0 +1,19 @@
+<div class="hidden">
+  {% render 'card-product',
+      card_product: product,
+  %}
+</div>
+{% schema %}
+  {
+    "name": "card-product",
+    "class": "card-product",
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    },
+    "presets": [
+      {
+        "name": "Card Product"
+      }
+    ]
+  }
+{% endschema %}
